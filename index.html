@@ -54,10 +54,15 @@ input,button{
 <h3>Dashboard</h3>
 <p class="balance">Balance: ৳<span id="money">0</span></p>
 
-<button onclick="earn()">🔥 Earn 10 Taka</button><br>
-<button onclick="withdraw()">💸 Withdraw</button><br>
-<button onclick="logout()">🚪 Logout</button>
+  
 
+<button onclick="logout()">🚪 Logout</button>
+<h4>Withdraw Request</h4>
+<input id="paynum" placeholder="bKash/Nagad Number"><br>
+<input id="amount" type="number" placeholder="Amount"><br>
+<button onclick="withdraw()">Send Withdraw</button>
+
+<p id="wmsg" style="color:green;font-weight:bold;"></p>
 <p>Your Referral Link:</p>
 <input id="reflink" readonly>
 </div>
@@ -132,19 +137,35 @@ function earn(){
 function withdraw(){
   if(!currentUser) return;
 
-  if(users[currentUser].money < 50){
-    alert("Minimum 50 টাকা লাগবে");
+  let num = document.getElementById("paynum").value.trim();
+  let amount = parseInt(document.getElementById("amount").value);
+  let msg = document.getElementById("wmsg");
+
+  if(!num || !amount){
+    msg.style.color = "red";
+    msg.innerText = "সব তথ্য পূরণ করো";
     return;
   }
 
-  users[currentUser].money -= 50;
+  if(amount < 50){
+    msg.style.color = "red";
+    msg.innerText = "Minimum 50 টাকা লাগবে";
+    return;
+  }
+
+  if(users[currentUser].money < amount){
+    msg.style.color = "red";
+    msg.innerText = "Balance কম আছে";
+    return;
+  }
+
+  users[currentUser].money -= amount;
   document.getElementById("money").innerText = users[currentUser].money;
   save();
-  alert("Withdraw request sent ✅");
-}
 
-// ===== LOGOUT =====
-function logout(){
+  msg.style.color = "green";
+  msg.innerText = "Withdraw request sent ✅";
+}
   currentUser = null;
   document.getElementById("dash").style.display = "none";
 }
