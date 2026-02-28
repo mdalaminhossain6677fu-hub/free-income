@@ -2,9 +2,61 @@
 <html>
 <head>
 <title>Free Income</title>
+<style>
+body{font-family:Arial;text-align:center;background:#f2f2f2}
+.box{background:white;padding:20px;margin:20px auto;width:300px;border-radius:10px}
+input,button{padding:10px;margin:5px;width:90%}
+</style>
 </head>
+
 <body>
-<h1>Welcome to Free Income</h1>
-<p>Login & Register System Coming Soon</p>
+
+<h1>💰 Free Income</h1>
+
+<div class="box" id="register">
+<h2>Register</h2>
+<input id="regUser" placeholder="Username"><br>
+<input id="regPass" type="password" placeholder="Password"><br>
+<button onclick="register()">Register</button>
+</div>
+
+<div class="box" id="login">
+<h2>Login</h2>
+<input id="logUser" placeholder="Username"><br>
+<input id="logPass" type="password" placeholder="Password"><br>
+<button onclick="login()">Login</button>
+</div>
+
+<div class="box" id="dash" style="display:none">
+<h2>🎉 Dashboard</h2>
+<p>Welcome to Free Income</p>
+<button onclick="logout()">Logout</button>
+</div>
+
+<script>
+function register(){
+let u=document.getElementById("regUser").value;
+let p=document.getElementById("regPass").value;
+localStorage.setItem("user",u);
+localStorage.setItem("pass",p);
+alert("Registered সফল");
+}
+
+function login(){
+let u=document.getElementById("logUser").value;
+let p=document.getElementById("logPass").value;
+if(u==localStorage.getItem("user") && p==localStorage.getItem("pass")){
+document.getElementById("dash").style.display="block";
+alert("Login সফল");
+}else{
+alert("ভুল তথ্য");
+}
+}
+
+function logout(){
+document.getElementById("dash").style.display="none";
+}
+</script>
+
 </body>
 </html>
