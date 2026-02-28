@@ -4,7 +4,7 @@
 <title>Free Income</title>
 <style>
 body{font-family:Arial;text-align:center;background:#f2f2f2}
-. auto;width:300px;border-radius:10px}
+.box{background:#fff;width:320px;margin:10px auto;padding:15px;border-radius:10px}
 input,button{padding:10px;margin:5px;width:90%}
 .balance{font-size:22px;color:green;font-weight:bold}
 </style>
@@ -14,60 +14,95 @@ input,button{padding:10px;margin:5px;width:90%}
 
 <h1>💰 Free Income</h1>
 
-<div class="box" id="register">
-<h2>Register</h2>
-<input id="regUser" placeholder="Username"><br>
-<input id="regPass" type="password" placeholder="Password"><br>
+<div class="box">
+<h3>Register</h3>
+<input id="ruser" placeholder="Username"><br>
+<input id="rpass" type="password" placeholder="Password"><br>
+<input id="ref" placeholder="Referral (optional)"><br>
 <button onclick="register()">Register</button>
 </div>
 
-<div class="box" id="login">
-<h2>Login</h2>
-<input id="logUser" placeholder="Username"><br>
-<input id="logPass" type="password" placeholder="Password"><br>
+<div class="box">
+<h3>Login</h3>
+<input id="luser" placeholder="Username"><br>
+<input id="lpass" type="password" placeholder="Password"><br>
 <button onclick="login()">Login</button>
 </div>
 
 <div class="box" id="dash" style="display:none">
-<h2>🎉 Dashboard</h2>
-<p class="balance">Balance: ৳ <span id="money">0</span></p>
+<h3>Dashboard</h3>
+<p class="balance">Balance: ৳<span id="money">0</span></p>
 
-<button onclick="earn()">💰 Earn 10 Taka</button><br><br>
+<button onclick="earn()">🎁 Earn 10 Taka</button><br>
+<button onclick="withdraw()">💸 Withdraw</button><br>
 <button onclick="logout()">Logout</button>
+
+<p>Your Referral Link:</p>
+<input id="reflink" readonly>
 </div>
 
 <script>
+
+let users = JSON.parse(localStorage.getItem("users")||"{}");
+let currentUser = null;
+
+function save(){
+localStorage.setItem("users",JSON.stringify(users));
+}
+
 function register(){
-let u=document.getElementById("regUser").value;
-let p=document.getElementById("regPass").value;
-localStorage.setItem("user",u);
-localStorage.setItem("pass",p);
-localStorage.setItem("money",0);
+let u=ruser.value;
+let p=rpass.value;
+let ref=ref.value;
+
+if(users[u]){alert("User exists");return;}
+
+users[u]={pass:p,money:0};
+
+if(ref && users[ref]){
+users[ref].money+=5;
+}
+
+save();
 alert("Registered সফল");
 }
 
 function login(){
-let u=document.getElementById("logUser").value;
-let p=document.getElementById("logPass").value;
-if(u==localStorage.getItem("user") && p==localStorage.getItem("pass")){
-document.getElementById("dash").style.display="block";
-document.getElementById("money").innerText=localStorage.getItem("money") || 0;
-alert("Login সফল");
+let u=luser.value;
+let p=lpass.value;
+
+if(users[u] && users[u].pass===p){
+currentUser=u;
+dash.style.display="block";
+money.innerText=users[u].money;
+reflink.value=location.href+"?ref="+u;
 }else{
-alert("ভুল তথ্য");
+alert("Login ভুল");
 }
 }
 
 function earn(){
-let m=parseInt(localStorage.getItem("money")) || 0;
-m+=10;
-localStorage.setItem("money",m);
-document.getElementById("money").innerText=m;
+users[currentUser].money += 10;
+money.innerText=users[currentUser].money;
+save();
+}
+
+function withdraw(){
+if(users[currentUser].money<50){
+alert("Minimum 50 টাকা লাগবে");
+return;
+}
+users[currentUser].money-=50;
+money.innerText=users[currentUser].money;
+save();
+alert("Withdraw request sent");
 }
 
 function logout(){
-document.getElementById("dash").style.display="none";
+dash.style.display="none";
+currentUser=null;
 }
+
 </script>
 
 </body>
