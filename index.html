@@ -3,10 +3,28 @@
 <head>
 <title>Free Income</title>
 <style>
-body{font-family:Arial;text-align:center;background:#f2f2f2}
-.box{background:#fff;width:320px;margin:10px auto;padding:15px;border-radius:10px}
-input,button{padding:10px;margin:5px;width:90%}
-.balance{font-size:22px;color:green;font-weight:bold}
+body{
+  font-family: Arial;
+  text-align:center;
+  background:#f2f2f2;
+}
+.box{
+  background:#fff;
+  max-width:400px;
+  margin:15px auto;
+  padding:15px;
+  border-radius:10px;
+}
+input,button{
+  padding:10px;
+  margin:6px;
+  width:90%;
+}
+.balance{
+  font-size:22px;
+  color:green;
+  font-weight:bold;
+}
 </style>
 </head>
 
@@ -14,6 +32,7 @@ input,button{padding:10px;margin:5px;width:90%}
 
 <h1>💰 Free Income</h1>
 
+<!-- REGISTER -->
 <div class="box">
 <h3>Register</h3>
 <input id="ruser" placeholder="Username"><br>
@@ -22,6 +41,7 @@ input,button{padding:10px;margin:5px;width:90%}
 <button onclick="register()">Register</button>
 </div>
 
+<!-- LOGIN -->
 <div class="box">
 <h3>Login</h3>
 <input id="luser" placeholder="Username"><br>
@@ -29,80 +49,105 @@ input,button{padding:10px;margin:5px;width:90%}
 <button onclick="login()">Login</button>
 </div>
 
+<!-- DASHBOARD -->
 <div class="box" id="dash" style="display:none">
 <h3>Dashboard</h3>
 <p class="balance">Balance: ৳<span id="money">0</span></p>
 
-<button onclick="earn()">🎁 Earn 10 Taka</button><br>
+<button onclick="earn()">🔥 Earn 10 Taka</button><br>
 <button onclick="withdraw()">💸 Withdraw</button><br>
-<button onclick="logout()">Logout</button>
+<button onclick="logout()">🚪 Logout</button>
 
 <p>Your Referral Link:</p>
 <input id="reflink" readonly>
 </div>
 
 <script>
-
-let users = JSON.parse(localStorage.getItem("users")||"{}");
+// ===== STORAGE =====
+let users = JSON.parse(localStorage.getItem("users") || "{}");
 let currentUser = null;
 
 function save(){
-localStorage.setItem("users",JSON.stringify(users));
+  localStorage.setItem("users", JSON.stringify(users));
 }
 
+// ===== AUTO REF DETECT =====
+const urlParams = new URLSearchParams(location.search);
+if(urlParams.get("ref")){
+  document.getElementById("ref").value = urlParams.get("ref");
+}
+
+// ===== REGISTER =====
 function register(){
-let u=ruser.value;
-let p=rpass.value;
-let ref=ref.value;
+  let u = document.getElementById("ruser").value.trim();
+  let p = document.getElementById("rpass").value.trim();
+  let refCode = document.getElementById("ref").value.trim();
 
-if(users[u]){alert("User exists");return;}
+  if(!u || !p){
+    alert("Username & Password দিন");
+    return;
+  }
 
-users[u]={pass:p,money:0};
+  if(users[u]){
+    alert("User already exists");
+    return;
+  }
 
-if(ref && users[ref]){
-users[ref].money+=5;
+  users[u] = {pass:p, money:0};
+
+  // referral bonus
+  if(refCode && users[refCode]){
+    users[refCode].money += 5;
+  }
+
+  save();
+  alert("Registered সফল ✅");
 }
 
-save();
-alert("Registered সফল");
-}
-
+// ===== LOGIN =====
 function login(){
-let u=luser.value;
-let p=lpass.value;
+  let u = document.getElementById("luser").value.trim();
+  let p = document.getElementById("lpass").value.trim();
 
-if(users[u] && users[u].pass===p){
-currentUser=u;
-dash.style.display="block";
-money.innerText=users[u].money;
-reflink.value=location.href+"?ref="+u;
-}else{
-alert("Login ভুল");
-}
+  if(users[u] && users[u].pass === p){
+    currentUser = u;
+    document.getElementById("dash").style.display = "block";
+    document.getElementById("money").innerText = users[u].money;
+    document.getElementById("reflink").value =
+      location.href.split("?")[0] + "?ref=" + u;
+  }else{
+    alert("Login ভুল ❌");
+  }
 }
 
+// ===== EARN =====
 function earn(){
-users[currentUser].money += 10;
-money.innerText=users[currentUser].money;
-save();
+  if(!currentUser) return;
+  users[currentUser].money += 10;
+  document.getElementById("money").innerText = users[currentUser].money;
+  save();
 }
 
+// ===== WITHDRAW =====
 function withdraw(){
-if(users[currentUser].money<50){
-alert("Minimum 50 টাকা লাগবে");
-return;
-}
-users[currentUser].money-=50;
-money.innerText=users[currentUser].money;
-save();
-alert("Withdraw request sent");
+  if(!currentUser) return;
+
+  if(users[currentUser].money < 50){
+    alert("Minimum 50 টাকা লাগবে");
+    return;
+  }
+
+  users[currentUser].money -= 50;
+  document.getElementById("money").innerText = users[currentUser].money;
+  save();
+  alert("Withdraw request sent ✅");
 }
 
+// ===== LOGOUT =====
 function logout(){
-dash.style.display="none";
-currentUser=null;
+  currentUser = null;
+  document.getElementById("dash").style.display = "none";
 }
-
 </script>
 
 </body>
