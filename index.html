@@ -4,8 +4,9 @@
 <title>Free Income</title>
 <style>
 body{font-family:Arial;text-align:center;background:#f2f2f2}
-.box{background:white;padding:20px;margin:20px auto;width:300px;border-radius:10px}
+. auto;width:300px;border-radius:10px}
 input,button{padding:10px;margin:5px;width:90%}
+.balance{font-size:22px;color:green;font-weight:bold}
 </style>
 </head>
 
@@ -29,7 +30,9 @@ input,button{padding:10px;margin:5px;width:90%}
 
 <div class="box" id="dash" style="display:none">
 <h2>🎉 Dashboard</h2>
-<p>Welcome to Free Income</p>
+<p class="balance">Balance: ৳ <span id="money">0</span></p>
+
+<button onclick="earn()">💰 Earn 10 Taka</button><br><br>
 <button onclick="logout()">Logout</button>
 </div>
 
@@ -39,6 +42,7 @@ let u=document.getElementById("regUser").value;
 let p=document.getElementById("regPass").value;
 localStorage.setItem("user",u);
 localStorage.setItem("pass",p);
+localStorage.setItem("money",0);
 alert("Registered সফল");
 }
 
@@ -47,10 +51,18 @@ let u=document.getElementById("logUser").value;
 let p=document.getElementById("logPass").value;
 if(u==localStorage.getItem("user") && p==localStorage.getItem("pass")){
 document.getElementById("dash").style.display="block";
+document.getElementById("money").innerText=localStorage.getItem("money") || 0;
 alert("Login সফল");
 }else{
 alert("ভুল তথ্য");
 }
+}
+
+function earn(){
+let m=parseInt(localStorage.getItem("money")) || 0;
+m+=10;
+localStorage.setItem("money",m);
+document.getElementById("money").innerText=m;
 }
 
 function logout(){
