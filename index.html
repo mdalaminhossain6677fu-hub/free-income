@@ -104,51 +104,7 @@ function login(){
   }
 }
 
-// ===== EARN =====
-function earn(){
-  if(!currentUser)return;
-  users[currentUser].money+=10;
-  document.getElementById("money").innerText=users[currentUser].money;
-  save();
-}
-
-// ===== WITHDRAW =====
-function withdraw(){
-  if(!currentUser)return;
-
-  let num=document.getElementById("paynum").value.trim();
-  let amount=parseInt(document.getElementById("amount").value);
-  let msg=document.getElementById("msg");
-
-  if(!num||!amount){
-    msg.className="red";
-    msg.innerText="সব তথ্য পূরণ করুন";
-    return;
-  }
-
-  if(amount<100){
-    msg.className="red";
-    msg.innerText="Minimum 100 টাকা লাগবে";
-    return;
-  }
-
-  if(users[currentUser].money<amount){
-    msg.className="red";
-    msg.innerText="Balance কম আছে";
-    return;
-  }
-
-  users[currentUser].money-=amount;
-  document.getElementById("money").innerText=users[currentUser].money;
-  save();
-
-  msg.className="green";
-  msg.innerText="Withdraw request sent ✅";
-}
-
-// ===== LOGOUT =====
-function logout(){
-  currentUser=null;
+// ।
   document.getElementById("dash").style.display="none";
   document.getElementById("auth").style.display="block";
 }
