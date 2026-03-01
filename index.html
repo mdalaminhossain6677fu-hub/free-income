@@ -1,152 +1,156 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Site</title>
-
+<title>Relax Income Clone</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-body{
-  font-family: Arial;
-  background:#f2f2f2;
-  text-align:center;
-  padding:20px;
-}
-
-.box{
-  background:white;
-  padding:20px;
-  margin:15px auto;
-  max-width:350px;
-  border-radius:10px;
-  box-shadow:0 0 10px rgba(0,0,0,0.1);
-}
-
-input,button{
-  width:90%;
-  padding:12px;
-  margin:8px;
-  border-radius:6px;
-  border:1px solid #ccc;
-  font-size:16px;
-}
-
-button{
-  background:#28a745;
-  color:white;
-  border:none;
-  cursor:pointer;
-}
-
-button:hover{
-  background:#218838;
-}
-
-#dashboard{display:none;}
+body{font-family:Arial;background:#f2f2f2;margin:0;padding:20px}
+.box{max-width:400px;margin:auto;background:#fff;padding:20px;border-radius:10px}
+input,button{width:100%;padding:12px;margin-top:10px;border-radius:6px;border:1px solid #ccc}
+button{background:linear-gradient(90deg,#2d6cdf,#00c9a7);color:#fff;font-weight:bold;border:none}
+.task{border:1px solid #ddd;padding:10px;margin-top:10px;border-radius:6px}
 </style>
 </head>
-
 <body>
 
-<h2>🔥 My Website</h2>
-
-<!-- REGISTER -->
 <div class="box" id="registerBox">
-<h3>Register</h3>
-<input type="text" id="regUser" placeholder="Username">
-<input type="password" id="regPass" placeholder="Password">
-<button onclick="register()">One Click Register</button>
+<h2>Create Account</h2>
+
+<input id="ref" placeholder="Referral Code (optional)">
+<input id="name" placeholder="Full Name">
+<input id="email" placeholder="Email">
+<input id="pass" type="password" placeholder="Password">
+
+<button onclick="register()">Register Now</button>
 </div>
 
-<!-- LOGIN -->
-<div class="box" id="loginBox">
-<h3>Login</h3>
-<input type="text" id="logUser" placeholder="Username">
-<input type="password" id="logPass" placeholder="Password">
-<button onclick="login()">One Click Login</button>
-</div>
+<div class="box" id="dashboard" style="display:none">
+<h2>Dashboard</h2>
+<p><b>Name:</b> <span id="dname"></span></p>
+<p><b>Balance:</b> ৳<span id="balance">0</span></p>
+<p><b>Your Referral Code:</b> <span id="myref"></span></p>
 
-<!-- DASHBOARD -->
-<div class="box" id="dashboard">
-<h3>Welcome <span id="showUser"></span></h3>
-<h2>Balance: ৳ <span id="balance">0</span></h2>
+<h3>Video Tasks</h3>
 
-<input type="number" id="withdrawAmount" placeholder="Withdraw amount">
-<button onclick="withdraw()">Withdraw</button>
+<div id="tasks"></div>
 
-<br><br>
-<button onclick="logout()" style="background:red;">Logout</button>
+<h3>Withdraw</h3>
+<input id="withdrawAmount" placeholder="Amount">
+<input id="withdrawNumber" placeholder="Bkash/Nagad Number">
+<button onclick="withdraw()">Withdraw Now</button>
+
+<h4>Withdraw History</h4>
+<ul id="history"></ul>
+
+<button onclick="logout()">Logout</button>
 </div>
 
 <script>
+// ===== AUTO LOGIN CHECK =====
+let user = JSON.parse(localStorage.getItem("user"));
+if(user){ showDashboard(); }
 
-// ===== REGISTER =====
+// ===== REGISTER (ONE CLICK) =====
 function register(){
-  let user=document.getElementById("regUser").value;
-  let pass=document.getElementById("regPass").value;
+  let name=document.getElementById("name").value;
+  let email=document.getElementById("email").value;
+  let pass=document.getElementById("pass").value;
+  let ref=document.getElementById("ref").value;
 
-  if(user==""||pass==""){
-    alert("Fill all fields");
-    return;
-  }
+  if(!name||!email||!pass){alert("Fill all fields");return;}
 
-  localStorage.setItem("username",user);
-  localStorage.setItem("password",pass);
-  localStorage.setItem("balance",100); // bonus balance
+  let newUser={
+    name:name,
+    email:email,
+    pass:pass,
+    balance:0,
+    refCode:"REF"+Math.floor(Math.random()*1000000),
+    tasks:[false,false,false,false,false],
+    withdraw:[]
+  };
 
-  alert("Register Success! Now Login");
+  localStorage.setItem("user",JSON.stringify(newUser));
+  showDashboard();
 }
 
-// ===== LOGIN =====
-function login(){
-  let user=document.getElementById("logUser").value;
-  let pass=document.getElementById("logPass").value;
+// ===== SHOW DASHBOARD =====
+function showDashboard(){
+  document.getElementById("registerBox").style.display="none";
+  document.getElementById("dashboard").style.display="block";
 
-  let savedUser=localStorage.getItem("username");
-  let savedPass=localStorage.getItem("password");
+  let user=JSON.parse(localStorage.getItem("user"));
 
-  if(user===savedUser && pass===savedPass){
-    document.getElementById("loginBox").style.display="none";
-    document.getElementById("registerBox").style.display="none";
-    document.getElementById("dashboard").style.display="block";
+  document.getElementById("dname").innerText=user.name;
+  document.getElementById("balance").innerText=user.balance;
+  document.getElementById("myref").innerText=user.refCode;
 
-    document.getElementById("showUser").innerText=user;
-    document.getElementById("balance").innerText=localStorage.getItem("balance");
-  }else{
-    alert("Wrong login info");
+  loadTasks();
+  loadHistory();
+}
+
+// ===== TASKS =====
+let rewards=[10,12,10,11,12];
+
+function loadTasks(){
+  let user=JSON.parse(localStorage.getItem("user"));
+  let html="";
+
+  for(let i=0;i<5;i++){
+    html+=`
+    <div class="task">
+      Watch Video ${i+1} — ৳${rewards[i]}
+      <button onclick="doTask(${i})">
+      ${user.tasks[i]?"Completed":"Start"}
+      </button>
+    </div>`;
   }
+
+  document.getElementById("tasks").innerHTML=html;
+}
+
+function doTask(i){
+  let user=JSON.parse(localStorage.getItem("user"));
+  if(user.tasks[i]) return;
+
+  user.tasks[i]=true;
+  user.balance+=rewards[i];
+
+  localStorage.setItem("user",JSON.stringify(user));
+  showDashboard();
 }
 
 // ===== WITHDRAW =====
 function withdraw(){
   let amount=parseInt(document.getElementById("withdrawAmount").value);
-  let balance=parseInt(localStorage.getItem("balance"));
+  let number=document.getElementById("withdrawNumber").value;
 
-  if(isNaN(amount) || amount<=0){
-    alert("Enter valid amount");
-    return;
-  }
+  let user=JSON.parse(localStorage.getItem("user"));
 
-  if(amount>balance){
-    alert("Not enough balance");
-    return;
-  }
+  if(amount>user.balance){alert("Insufficient balance");return;}
+  if(!number){alert("Enter number");return;}
 
-  balance-=amount;
-  localStorage.setItem("balance",balance);
-  document.getElementById("balance").innerText=balance;
+  user.balance-=amount;
+  user.withdraw.push(amount+" ৳ → "+number);
 
-  alert("Withdraw Success");
+  localStorage.setItem("user",JSON.stringify(user));
+  showDashboard();
+}
+
+// ===== HISTORY =====
+function loadHistory(){
+  let user=JSON.parse(localStorage.getItem("user"));
+  let html="";
+  user.withdraw.forEach(w=> html+="<li>"+w+"</li>");
+  document.getElementById("history").innerHTML=html;
 }
 
 // ===== LOGOUT =====
 function logout(){
+  localStorage.removeItem("user");
   location.reload();
 }
-
 </script>
 
 </body>
 </html>
-
- 
