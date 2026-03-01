@@ -1,114 +1,14 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>💰 Free Income</title>
-<style>
-body{font-family:Arial;background:#f2f2f2;padding:20px;text-align:center}
-.box{background:#fff;padding:20px;margin:15px auto;border-radius:10px;max-width:350px}
-input,button{width:90%;padding:10px;margin:6px;border-radius:6px;border:1px solid #ccc}
-button{background:#28a745;color:#fff;font-weight:bold;border:none}
-#dash{display:none}
-.green{color:green}
-.red{color:red}
-</style>
-</head>
-<body>
+import React, { useState, useEffect } from "react";
 
-<h2>💰 Free Income</h2>
+// ===== Helper ===== const getUsers = () => JSON.parse(localStorage.getItem("users") || "[]"); const saveUsers = (u) => localStorage.setItem("users", JSON.stringify(u));
 
-<div id="auth">
+export default function App() { const [page, setPage] = useState("register"); const [currentUser, setCurrentUser] = useState(null);
 
-<div class="box">
-<h3>Register</h3>
-<input id="ruser" placeholder="Email">
-<input id="rpass" type="password" placeholder="Password">
-<input id="ref" placeholder="Referral (optional)">
-<button onclick="register()">Register</button>
-</div>
+// ===== Register State ===== const [refCode, setRefCode] = useState(""); const [name, setName] = useState(""); const [email, setEmail] = useState(""); const [password, setPassword] = useState(""); const [confirm, setConfirm] = useState(""); const [agree, setAgree] = useState(false);
 
-<div class="box">
-<h3>Login</h3>
-<input id="luser" placeholder="Email">
-<input id="lpass" type="password" placeholder="Password">
-<button onclick="login()">Login</button>
-</div>
+// ===== Login State ===== const [loginEmail, setLoginEmail] = useState(""); const [loginPass, setLoginPass] = useState("");
 
-</div>
+// ===== Register ===== const handleRegister = () => { if (!name || !email || !password) { alert("সব তথ্য দিন"); return; }
 
-<div id="dash" class="box">
-<h3>Dashboard</h3>
-<h2 class="green">Balance: ৳<span id="money">0</span></h2>
-
-<button onclick="earn()">🎁 Earn 10 Taka</button>
-<button onclick="logout()">🚪 Logout</button>
-
-<h4>Withdraw</h4>
-<input id="paynum" placeholder="bKash/Nagad Number">
-<input id="amount" placeholder="Amount">
-<button onclick="withdraw()">Send Withdraw</button>
-<p id="msg"></p>
-
-<h4>Your Referral Link</h4>
-<input id="reflink" readonly>
-
-</div>
-
-<script>
-// ===== STORAGE =====
-let users = JSON.parse(localStorage.getItem("users")||"{}");
-let currentUser = null;
-
-function save(){
-  localStorage.setItem("users",JSON.stringify(users));
-}
-
-// ===== AUTO REF =====
-let urlRef = new URLSearchParams(location.search).get("ref");
-if(urlRef){
-  document.getElementById("ref").value = urlRef;
-}
-
-// ===== REGISTER =====
-function register(){
-  let u=document.getElementById("ruser").value.trim();
-  let p=document.getElementById("rpass").value.trim();
-  let ref=document.getElementById("ref").value.trim();
-
-  if(!u||!p){alert("Username & Password দিন");return;}
-  if(users[u]){alert("User already exists");return;}
-
-  users[u]={pass:p,money:0};
-
-  if(ref && users[ref]){
-    users[ref].money+=5;
-  }
-
-  save();
-  alert("Registered ✅");
-}
-
-// ===== LOGIN =====
-function login(){
-  let u=document.getElementById("luser").value.trim();
-  let p=document.getElementById("lpass").value.trim();
-
-  if(users[u] && users[u].pass===p){
-    currentUser=u;
-    document.getElementById("dash").style.display="block";
-    document.getElementById("auth").style.display="none";
-    document.getElementById("money").innerText=users[u].money;
-    document.getElementById("reflink").value=location.href.split("?")[0]+"?ref="+u;
-  }else{
-    alert("Login failed ❌");
-  }
-}
-
-// ।
-  document.getElementById("dash").style.display="none";
-  document.getElementById("auth").style.display="block";
-}
-</script>
-
-</body>
-</html>
+if (password !== confirm) {
+  alert
