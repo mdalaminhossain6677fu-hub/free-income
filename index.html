@@ -1,163 +1,152 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="bn">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1.0" />
- 
-<title>Relax Income Pro</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Site</title>
+
 <style>
-body{font-family:Arial;background:#f2f4f8;margin:0}
-.card{max-width:420px;margin:20px auto;background:#fff;padding:20px;border-radius:14px;box-shadow:0 4px 12px rgba(0,0,0,.08)}
-input,button{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #ddd;font-size:14px}
-button{background:linear-gradient(90deg,#2b6cff,#00b894);color:#fff;border:none;font-weight:bold;cursor:pointer}
-.hidden{display:none}
-.task{border:1px solid #eee;padding:10px;border-radius:10px;margin:8px 0}
-.small{font-size:12px;color:#666}
+body{
+  font-family: Arial;
+  background:#f2f2f2;
+  text-align:center;
+  padding:20px;
+}
+
+.box{
+  background:white;
+  padding:20px;
+  margin:15px auto;
+  max-width:350px;
+  border-radius:10px;
+  box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+input,button{
+  width:90%;
+  padding:12px;
+  margin:8px;
+  border-radius:6px;
+  border:1px solid #ccc;
+  font-size:16px;
+}
+
+button{
+  background:#28a745;
+  color:white;
+  border:none;
+  cursor:pointer;
+}
+
+button:hover{
+  background:#218838;
+}
+
+#dashboard{display:none;}
 </style>
 </head>
-<body><!-- REGISTER --><div class="card" id="registerPage">
-<h2>Create Account</h2>
-<input id="ref" placeholder="Referral Code (optional)">
-<input id="name" placeholder="Full Name">
-<input id="email" placeholder="Email">
-<input id="pass" type="password" placeholder="Password">
-<button onclick="register()">Register Now</button>
-<p class="small">Already member? <a href="#" onclick="showLogin()">Login</a></p>
-</div><!-- LOGIN --><div class="card hidden" id="loginPage">
-<h2>Login</h2>
-<input id="loginEmail" placeholder="Email">
-<input id="loginPass" type="password" placeholder="Password">
-<button onclick="login()">Login Now</button>
-</div><!-- DASHBOARD --><div class="card hidden" id="dash">
-<h3 id="welcome"></h3>
-<p><b>Balance:</b> ৳<span id="bal">0</span></p>
-<p><b>Your Referral:</b> <span id="myref"></span></p><button onclick="dailyBonus()">🎁 Daily Bonus +5</button>
 
-<h4>📺 Video Tasks</h4>
-<div id="tasks"></div><h4>💰 Withdraw</h4>
-<input id="wdAmount" placeholder="Amount">
-<input id="wdNumber" placeholder="Bkash/Nagad Number">
-<button onclick="withdraw()">Withdraw Now</button><h4>🧾 Withdraw History</h4>
-<div id="history" class="small"></div><button onclick="logout()">Logout</button>
+<body>
 
-</div><script>
-// ===== DATA =====
-const TASKS=[{id:1,reward:12},{id:2,reward:10},{id:3,reward:8},{id:4,reward:6},{id:5,reward:5}];
-function getUsers(){return JSON.parse(localStorage.getItem('users')||'[]')}
-function saveUsers(u){localStorage.setItem('users',JSON.stringify(u))}
+<h2>🔥 My Website</h2>
 
-// ===== NAV =====
-function showLogin(){registerPage.classList.add('hidden');loginPage.classList.remove('hidden')}
-function showDash(){registerPage.classList.add('hidden');loginPage.classList.add('hidden');dash.classList.remove('hidden')}
+<!-- REGISTER -->
+<div class="box" id="registerBox">
+<h3>Register</h3>
+<input type="text" id="regUser" placeholder="Username">
+<input type="password" id="regPass" placeholder="Password">
+<button onclick="register()">One Click Register</button>
+</div>
+
+<!-- LOGIN -->
+<div class="box" id="loginBox">
+<h3>Login</h3>
+<input type="text" id="logUser" placeholder="Username">
+<input type="password" id="logPass" placeholder="Password">
+<button onclick="login()">One Click Login</button>
+</div>
+
+<!-- DASHBOARD -->
+<div class="box" id="dashboard">
+<h3>Welcome <span id="showUser"></span></h3>
+<h2>Balance: ৳ <span id="balance">0</span></h2>
+
+<input type="number" id="withdrawAmount" placeholder="Withdraw amount">
+<button onclick="withdraw()">Withdraw</button>
+
+<br><br>
+<button onclick="logout()" style="background:red;">Logout</button>
+</div>
+
+<script>
 
 // ===== REGISTER =====
 function register(){
- let name=nameEl().value.trim();
- let email=emailEl().value.trim();
- let pass=passEl().value.trim();
- let refInput=document.getElementById('ref').value.trim();
- if(!name||!email||!pass) return alert('সব তথ্য দিন');
- let users=getUsers();
- if(users.find(u=>u.email===email)) return alert('Email already used');
- let myRef='REF'+Math.random().toString(36).slice(2,7).toUpperCase();
- let user={name,email,pass,balance:0,myRef,done:[],withdraw:[],lastBonus:0};
- users.push(user);
- if(refInput){let refUser=users.find(u=>u.myRef===refInput);if(refUser){refUser.balance+=5}}
- saveUsers(users);
- localStorage.setItem('currentUser',email);
- loadDash();
+  let user=document.getElementById("regUser").value;
+  let pass=document.getElementById("regPass").value;
+
+  if(user==""||pass==""){
+    alert("Fill all fields");
+    return;
+  }
+
+  localStorage.setItem("username",user);
+  localStorage.setItem("password",pass);
+  localStorage.setItem("balance",100); // bonus balance
+
+  alert("Register Success! Now Login");
 }
 
 // ===== LOGIN =====
 function login(){
- let email=document.getElementById('loginEmail').value.trim();
- let pass=document.getElementById('loginPass').value.trim();
- let users=getUsers();
- let user=users.find(u=>u.email===email && u.pass===pass);
- if(!user) return alert('Login failed');
- localStorage.setItem('currentUser',email);
- loadDash();
-}
+  let user=document.getElementById("logUser").value;
+  let pass=document.getElementById("logPass").value;
 
-// ===== DASH =====
-function loadDash(){
- let email=localStorage.getItem('currentUser');
- if(!email) return;
- let users=getUsers();
- let user=users.find(u=>u.email===email);
- showDash();
- welcome.innerText='Welcome, '+user.name;
- bal.innerText=user.balance;
- myref.innerText=user.myRef;
- renderTasks(user);
- showWithdraw(user);
-}
+  let savedUser=localStorage.getItem("username");
+  let savedPass=localStorage.getItem("password");
 
-// ===== TASKS =====
-function renderTasks(user){
- tasks.innerHTML='';
- TASKS.forEach(t=>{
-  let done=user.done.includes(t.id);
-  tasks.innerHTML+=`<div class="task">🎬 Watch Video — ৳${t.reward}<br><button ${done?'disabled':''} onclick="watchTask(${t.id})">${done?'Completed':'Watch 10s'}</button></div>`;
- })
-}
+  if(user===savedUser && pass===savedPass){
+    document.getElementById("loginBox").style.display="none";
+    document.getElementById("registerBox").style.display="none";
+    document.getElementById("dashboard").style.display="block";
 
-function watchTask(id){
- let email=localStorage.getItem('currentUser');
- let users=getUsers();
- let user=users.find(u=>u.email===email);
- if(user.done.includes(id)) return;
- alert('ভিডিও চলছে 10 সেকেন্ড...');
- setTimeout(()=>{
-   let task=TASKS.find(x=>x.id===id);
-   user.balance+=task.reward;
-   user.done.push(id);
-   saveUsers(users);
-   loadDash();
-   alert('Income added ✅');
- },10000);
-}
-
-// ===== DAILY BONUS =====
-function dailyBonus(){
- let email=localStorage.getItem('currentUser');
- let users=getUsers();
- let user=users.find(u=>u.email===email);
- let today=new Date().toDateString();
- if(user.lastBonus===today) return alert('আজকে নেওয়া হয়েছে');
- user.balance+=5;
- user.lastBonus=today;
- saveUsers(users);
- loadDash();
+    document.getElementById("showUser").innerText=user;
+    document.getElementById("balance").innerText=localStorage.getItem("balance");
+  }else{
+    alert("Wrong login info");
+  }
 }
 
 // ===== WITHDRAW =====
 function withdraw(){
- let amount=parseInt(wdAmount.value);
- let number=wdNumber.value.trim();
- let email=localStorage.getItem('currentUser');
- let users=getUsers();
- let user=users.find(u=>u.email===email);
- if(!amount||amount<50) return alert('Minimum ৳50');
- if(amount>user.balance) return alert('Balance কম');
- if(!number) return alert('Number দিন');
- user.balance-=amount;
- user.withdraw.push({amount,number,date:new Date().toLocaleString(),status:'Pending'});
- saveUsers(users);
- loadDash();
-}
+  let amount=parseInt(document.getElementById("withdrawAmount").value);
+  let balance=parseInt(localStorage.getItem("balance"));
 
-function showWithdraw(user){
- history.innerHTML='';
- user.withdraw.slice().reverse().forEach(w=>{history.innerHTML+=`৳${w.amount} → ${w.number} (${w.status})<br>`})
+  if(isNaN(amount) || amount<=0){
+    alert("Enter valid amount");
+    return;
+  }
+
+  if(amount>balance){
+    alert("Not enough balance");
+    return;
+  }
+
+  balance-=amount;
+  localStorage.setItem("balance",balance);
+  document.getElementById("balance").innerText=balance;
+
+  alert("Withdraw Success");
 }
 
 // ===== LOGOUT =====
-function logout(){localStorage.removeItem('currentUser');location.reload()}
+function logout(){
+  location.reload();
+}
 
-function nameEl(){return document.getElementById('name')}
-function emailEl(){return document.getElementById('email')}
-function passEl(){return document.getElementById('pass')}
+</script>
 
-window.onload=loadDash;
-</script></body>
+</body>
 </html>
+
+ 
