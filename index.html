@@ -1,14 +1,225 @@
-import React, { useState, useEffect } from "react";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Relax Income Clone</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-// ===== Helper ===== const getUsers = () => JSON.parse(localStorage.getItem("users") || "[]"); const saveUsers = (u) => localStorage.setItem("users", JSON.stringify(u));
+<style>
+body{
+  font-family: Arial;
+  background:#f2f4f8;
+  margin:0;
+}
 
-export default function App() { const [page, setPage] = useState("register"); const [currentUser, setCurrentUser] = useState(null);
+.card{
+  background:#fff;
+  max-width:400px;
+  margin:30px auto;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 5px 20px rgba(0,0,0,.1);
+}
 
-// ===== Register State ===== const [refCode, setRefCode] = useState(""); const [name, setName] = useState(""); const [email, setEmail] = useState(""); const [password, setPassword] = useState(""); const [confirm, setConfirm] = useState(""); const [agree, setAgree] = useState(false);
+input,button{
+  width:100%;
+  padding:12px;
+  margin:6px 0;
+  border-radius:8px;
+  border:1px solid #ccc;
+  font-size:16px;
+}
 
-// ===== Login State ===== const [loginEmail, setLoginEmail] = useState(""); const [loginPass, setLoginPass] = useState("");
+button{
+  background:linear-gradient(90deg,#2b6cff,#00bcd4);
+  color:#fff;
+  border:none;
+  font-weight:bold;
+}
 
-// ===== Register ===== const handleRegister = () => { if (!name || !email || !password) { alert("সব তথ্য দিন"); return; }
+.task{
+  border:1px solid #ddd;
+  padding:12px;
+  margin:8px 0;
+  border-radius:10px;
+}
+</style>
+</head>
 
-if (password !== confirm) {
-  alert
+<body>
+
+<div id="app"></div>
+
+<script>
+// ================= STORAGE =================
+function getUsers(){
+  return JSON.parse(localStorage.getItem("users")||"[]");
+}
+function saveUsers(u){
+  localStorage.setItem("users",JSON.stringify(u));
+}
+
+// ================= TASK LIST =================
+const TASKS=[
+ {id:1,title:"ভিডিও দেখুন #1",reward:12},
+ {id:2,title:"ভিডিও দেখুন #2",reward:10},
+ {id:3,title:"ভিডিও দেখুন #3",reward:8},
+ {id:4,title:"ভিডিও দেখুন #4",reward:15},
+ {id:5,title:"ভিডিও দেখুন #5",reward:6},
+ {id:6,title:"ভিডিও দেখুন #6",reward:5},
+];
+
+let currentUser=null;
+
+// ================= REGISTER PAGE =================
+function showRegister(){
+document.getElementById("app").innerHTML=`
+<div class="card">
+<h2>Create Account</h2>
+
+<input id="ref" placeholder="Referral Code">
+<input id="name" placeholder="Full Name">
+<input id="email" placeholder="Email">
+<input id="pass" type="password" placeholder="Password">
+<input id="cpass" type="password" placeholder="Confirm Password">
+
+<label><input type="checkbox" id="agree"> I agree</label>
+
+<button onclick="register()">Register Now</button>
+<p>Already member? <a href="#" onclick="showLogin()">Login</a></p>
+</div>`;
+}
+
+// ================= REGISTER FUNCTION =================
+function register(){
+const ref=document.getElementById("ref").value;
+const name=document.getElementById("name").value;
+const email=document.getElementById("email").value;
+const pass=document.getElementById("pass").value;
+const cpass=document.getElementById("cpass").value;
+const agree=document.getElementById("agree").checked;
+
+if(!name||!email||!pass) return alert("সব তথ্য দিন");
+if(pass!==cpass) return alert("Password মিলেনি");
+if(!agree) return alert("Terms এ টিক দিন");
+
+let users=getUsers();
+
+if(users.find(u=>u.email===email)){
+  return alert("Email আগে ব্যবহার হয়েছে");
+}
+
+const myRef="REF"+Math.random().toString(36).substring(2,8).toUpperCase();
+
+let newUser={
+  name,email,password:pass,
+  myRef,
+  referBalance:0,
+  taskBalance:0,
+  completed:[]
+};
+
+// referral bonus
+if(ref){
+  let refUser=users.find(u=>u.myRef===ref);
+  if(refUser) refUser.referBalance+=10;
+}
+
+users.push(newUser);
+saveUsers(users);
+
+alert("রেজিস্টার সফল ✅");
+showLogin();
+}
+
+// ================= LOGIN PAGE =================
+function showLogin(){
+document.getElementById("app").innerHTML=`
+<div class="card">
+<h2>Login</h2>
+
+<input id="lemail" placeholder="Email">
+<input id="lpass" type="password" placeholder="Password">
+
+<button onclick="login()">Login Now</button>
+<p>No account? <a href="#" onclick="showRegister()">Register</a></p>
+</div>`;
+}
+
+// ================= LOGIN FUNCTION =================
+function login(){
+const email=document.getElementById("lemail").value;
+const pass=document.getElementById("lpass").value;
+
+let users=getUsers();
+let user=users.find(u=>u.email===email && u.password===pass);
+
+if(!user) return alert("Login ভুল");
+
+currentUser=user;
+showDashboard();
+}
+
+// ================= DASHBOARD =================
+function showDashboard(){
+let taskHtml="";
+
+TASKS.forEach(t=>{
+const done=currentUser.completed.includes(t.id);
+
+taskHtml+=`
+<div class="task">
+<b>${t.title}</b><br>
+Reward: ${t.reward} টাকা<br>
+<button ${done?"disabled":""}
+onclick="completeTask(${t.id})">
+${done?"Completed":"Watch & Earn"}
+</button>
+</div>`;
+});
+
+document.getElementById("app").innerHTML=`
+<div class="card">
+<h3>Welcome ${currentUser.name}</h3>
+
+<p><b>Your Ref Code:</b> ${currentUser.myRef}</p>
+<p>Referral Income: ${currentUser.referBalance} টাকা</p>
+<p>Task Income: ${currentUser.taskBalance} টাকা</p>
+
+<hr>
+<h3>Video Tasks</h3>
+${taskHtml}
+
+<button onclick="logout()">Logout</button>
+</div>`;
+}
+
+// ================= COMPLETE TASK =================
+function completeTask(id){
+let users=getUsers();
+let user=users.find(u=>u.email===currentUser.email);
+
+if(user.completed.includes(id)) return;
+
+let task=TASKS.find(t=>t.id===id);
+user.taskBalance+=task.reward;
+user.completed.push(id);
+
+saveUsers(users);
+currentUser=user;
+
+alert("টাকা যোগ হয়েছে ✅");
+showDashboard();
+}
+
+// ================= LOGOUT =================
+function logout(){
+currentUser=null;
+showLogin();
+}
+
+// start
+showRegister();
+</script>
+</body>
+</html>
