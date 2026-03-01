@@ -1,12 +1,11 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Income Site</title>
+<title>Income Site Pro</title>
 <style>
 body{font-family:Arial;background:#f2f2f2;padding:20px}
-.box{max-width:400px;margin:auto;background:#fff;padding:20px;border-radius:10px}
+.box{max-width:420px;margin:auto;background:#fff;padding:20px;border-radius:10px}
 input,button{width:100%;padding:10px;margin:6px 0}
 button{background:linear-gradient(45deg,#2b7cff,#00c6a7);color:#fff;border:none;border-radius:6px;font-size:16px}
 .task{border:1px solid #ddd;padding:10px;margin:8px 0;border-radius:6px}
@@ -14,6 +13,7 @@ button{background:linear-gradient(45deg,#2b7cff,#00c6a7);color:#fff;border:none;
 </head>
 <body>
 
+<!-- ================= AUTH ================= -->
 <div class="box" id="authBox">
 <h2>Create Account</h2>
 
@@ -30,18 +30,28 @@ button{background:linear-gradient(45deg,#2b7cff,#00c6a7);color:#fff;border:none;
 <button type="button" onclick="login()">Login</button>
 </div>
 
+<!-- ================= DASHBOARD ================= -->
 <div class="box" id="dashBox" style="display:none">
 <h2>Dashboard</h2>
 
 <p><b>Name:</b> <span id="dName"></span></p>
 <p><b>Balance:</b> ৳<span id="dBal">0</span></p>
-<p><b>Referral Code:</b> <span id="dRef"></span></p>
+<p><b>Your Referral Code:</b> <span id="dRef"></span></p>
 
 <hr>
 <h3>🎬 Video Tasks</h3>
-
 <div id="tasks"></div>
 
+<hr>
+<h3>💸 Withdraw</h3>
+<input id="withdrawAmount" placeholder="Amount (৳)">
+<input id="withdrawNumber" placeholder="Bkash/Nagad Number">
+<button onclick="withdraw()">Withdraw Now</button>
+
+<h4>Withdraw History</h4>
+<div id="withdrawHistory"></div>
+
+<br>
 <button onclick="logout()">Logout</button>
 </div>
 
@@ -55,12 +65,12 @@ let videoTasks = [
   {id:5, reward:12}
 ];
 
-// ---------- REGISTER ----------
+// ---------- REGISTER (ONE CLICK) ----------
 function register(){
 
-  let name = nameEl().value.trim();
-  let email = emailEl().value.trim();
-  let pass = passEl().value.trim();
+  let name = document.getElementById("name").value.trim();
+  let email = document.getElementById("email").value.trim();
+  let pass = document.getElementById("pass").value.trim();
 
   if(!name || !email || !pass){
     alert("সব তথ্য দিন");
@@ -75,7 +85,8 @@ function register(){
     pass:pass,
     balance:0,
     ref:refCode,
-    doneTasks:[]
+    doneTasks:[],
+    withdrawHistory:[]
   };
 
   localStorage.setItem("user_"+email, JSON.stringify(user));
@@ -126,6 +137,7 @@ function loadDashboard(){
   dRef.innerText = user.ref;
 
   renderTasks(user);
+  showWithdraw(user);
 }
 
 // ---------- TASK RENDER ----------
@@ -166,18 +178,71 @@ function doTask(id){
   loadDashboard();
 }
 
+// ---------- WITHDRAW ----------
+function withdraw(){
+
+  let email = localStorage.getItem("currentUser");
+  let user = JSON.parse(localStorage.getItem("user_"+email));
+
+  let amount = parseInt(document.getElementById("withdrawAmount").value);
+  let number = document.getElementById("withdrawNumber").value.trim();
+
+  if(!amount || amount < 50){
+    alert("Minimum withdraw ৳50");
+    return;
+  }
+
+  if(amount > user.balance){
+    alert("Balance কম আছে");
+    return;
+  }
+
+  if(!number){
+    alert("Number দিন");
+    return;
+  }
+
+  user.balance -= amount;
+
+  user.withdrawHistory.push({
+    amount:amount,
+    number:number,
+    date:new Date().toLocaleString(),
+    status:"Pending"
+  });
+
+  localStorage.setItem("user_"+email, JSON.stringify(user));
+
+  alert("Withdraw Request Submitted ✅");
+
+  loadDashboard();
+}
+
+// ---------- SHOW WITHDRAW ----------
+function showWithdraw(user){
+
+  withdrawHistory.innerHTML="";
+
+  if(!user.withdrawHistory) return;
+
+  user.withdrawHistory.slice().reverse().forEach(w=>{
+    withdrawHistory.innerHTML += `
+      <div class="task">
+        ৳${w.amount} → ${w.number}<br>
+        ${w.date}<br>
+        <b>${w.status}</b>
+      </div>
+    `;
+  });
+}
+
 // ---------- LOGOUT ----------
 function logout(){
   localStorage.removeItem("currentUser");
   location.reload();
 }
 
-// ---------- HELPERS ----------
-function nameEl(){return document.getElementById("name")}
-function emailEl(){return document.getElementById("email")}
-function passEl(){return document.getElementById("pass")}
-
-// auto login if exists
+// auto login
 window.onload = loadDashboard;
 </script>
 
