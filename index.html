@@ -1,225 +1,185 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Relax Income Clone</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<title>Income Site</title>
 <style>
-body{
-  font-family: Arial;
-  background:#f2f4f8;
-  margin:0;
-}
-
-.card{
-  background:#fff;
-  max-width:400px;
-  margin:30px auto;
-  padding:20px;
-  border-radius:12px;
-  box-shadow:0 5px 20px rgba(0,0,0,.1);
-}
-
-input,button{
-  width:100%;
-  padding:12px;
-  margin:6px 0;
-  border-radius:8px;
-  border:1px solid #ccc;
-  font-size:16px;
-}
-
-button{
-  background:linear-gradient(90deg,#2b6cff,#00bcd4);
-  color:#fff;
-  border:none;
-  font-weight:bold;
-}
-
-.task{
-  border:1px solid #ddd;
-  padding:12px;
-  margin:8px 0;
-  border-radius:10px;
-}
+body{font-family:Arial;background:#f2f2f2;padding:20px}
+.box{max-width:400px;margin:auto;background:#fff;padding:20px;border-radius:10px}
+input,button{width:100%;padding:10px;margin:6px 0}
+button{background:linear-gradient(45deg,#2b7cff,#00c6a7);color:#fff;border:none;border-radius:6px;font-size:16px}
+.task{border:1px solid #ddd;padding:10px;margin:8px 0;border-radius:6px}
 </style>
 </head>
-
 <body>
 
-<div id="app"></div>
-
-<script>
-// ================= STORAGE =================
-function getUsers(){
-  return JSON.parse(localStorage.getItem("users")||"[]");
-}
-function saveUsers(u){
-  localStorage.setItem("users",JSON.stringify(u));
-}
-
-// ================= TASK LIST =================
-const TASKS=[
- {id:1,title:"ভিডিও দেখুন #1",reward:12},
- {id:2,title:"ভিডিও দেখুন #2",reward:10},
- {id:3,title:"ভিডিও দেখুন #3",reward:8},
- {id:4,title:"ভিডিও দেখুন #4",reward:15},
- {id:5,title:"ভিডিও দেখুন #5",reward:6},
- {id:6,title:"ভিডিও দেখুন #6",reward:5},
-];
-
-let currentUser=null;
-
-// ================= REGISTER PAGE =================
-function showRegister(){
-document.getElementById("app").innerHTML=`
-<div class="card">
+<div class="box" id="authBox">
 <h2>Create Account</h2>
 
-<input id="ref" placeholder="Referral Code">
 <input id="name" placeholder="Full Name">
 <input id="email" placeholder="Email">
 <input id="pass" type="password" placeholder="Password">
-<input id="cpass" type="password" placeholder="Confirm Password">
-
-<label><input type="checkbox" id="agree"> I agree</label>
-
-<button onclick="register()">Register Now</button>
-<p>Already member? <a href="#" onclick="showLogin()">Login</a></p>
-</div>`;
-}
-
-// ================= REGISTER FUNCTION =================
-function register(){
-const ref=document.getElementById("ref").value;
-const name=document.getElementById("name").value;
-const email=document.getElementById("email").value;
-const pass=document.getElementById("pass").value;
-const cpass=document.getElementById("cpass").value;
-const agree=document.getElementById("agree").checked;
-
-if(!name||!email||!pass) return alert("সব তথ্য দিন");
-if(pass!==cpass) return alert("Password মিলেনি");
-if(!agree) return alert("Terms এ টিক দিন");
-
-let users=getUsers();
-
-if(users.find(u=>u.email===email)){
-  return alert("Email আগে ব্যবহার হয়েছে");
-}
-
-const myRef="REF"+Math.random().toString(36).substring(2,8).toUpperCase();
-
-let newUser={
-  name,email,password:pass,
-  myRef,
-  referBalance:0,
-  taskBalance:0,
-  completed:[]
-};
-
-// referral bonus
-if(ref){
-  let refUser=users.find(u=>u.myRef===ref);
-  if(refUser) refUser.referBalance+=10;
-}
-
-users.push(newUser);
-saveUsers(users);
-
-alert("রেজিস্টার সফল ✅");
-showLogin();
-}
-
-// ================= LOGIN PAGE =================
-function showLogin(){
-document.getElementById("app").innerHTML=`
-<div class="card">
-<h2>Login</h2>
-
-<input id="lemail" placeholder="Email">
-<input id="lpass" type="password" placeholder="Password">
-
-<button onclick="login()">Login Now</button>
-<p>No account? <a href="#" onclick="showRegister()">Register</a></p>
-</div>`;
-}
-
-// ================= LOGIN FUNCTION =================
-function login(){
-const email=document.getElementById("lemail").value;
-const pass=document.getElementById("lpass").value;
-
-let users=getUsers();
-let user=users.find(u=>u.email===email && u.password===pass);
-
-if(!user) return alert("Login ভুল");
-
-currentUser=user;
-showDashboard();
-}
-
-// ================= DASHBOARD =================
-function showDashboard(){
-let taskHtml="";
-
-TASKS.forEach(t=>{
-const done=currentUser.completed.includes(t.id);
-
-taskHtml+=`
-<div class="task">
-<b>${t.title}</b><br>
-Reward: ${t.reward} টাকা<br>
-<button ${done?"disabled":""}
-onclick="completeTask(${t.id})">
-${done?"Completed":"Watch & Earn"}
-</button>
-</div>`;
-});
-
-document.getElementById("app").innerHTML=`
-<div class="card">
-<h3>Welcome ${currentUser.name}</h3>
-
-<p><b>Your Ref Code:</b> ${currentUser.myRef}</p>
-<p>Referral Income: ${currentUser.referBalance} টাকা</p>
-<p>Task Income: ${currentUser.taskBalance} টাকা</p>
+<button type="button" onclick="register()">Register Now</button>
 
 <hr>
-<h3>Video Tasks</h3>
-${taskHtml}
+
+<h3>Login</h3>
+<input id="loginEmail" placeholder="Email">
+<input id="loginPass" type="password" placeholder="Password">
+<button type="button" onclick="login()">Login</button>
+</div>
+
+<div class="box" id="dashBox" style="display:none">
+<h2>Dashboard</h2>
+
+<p><b>Name:</b> <span id="dName"></span></p>
+<p><b>Balance:</b> ৳<span id="dBal">0</span></p>
+<p><b>Referral Code:</b> <span id="dRef"></span></p>
+
+<hr>
+<h3>🎬 Video Tasks</h3>
+
+<div id="tasks"></div>
 
 <button onclick="logout()">Logout</button>
-</div>`;
+</div>
+
+<script>
+// ---------- TASK LIST ----------
+let videoTasks = [
+  {id:1, reward:10},
+  {id:2, reward:12},
+  {id:3, reward:10},
+  {id:4, reward:11},
+  {id:5, reward:12}
+];
+
+// ---------- REGISTER ----------
+function register(){
+
+  let name = nameEl().value.trim();
+  let email = emailEl().value.trim();
+  let pass = passEl().value.trim();
+
+  if(!name || !email || !pass){
+    alert("সব তথ্য দিন");
+    return;
+  }
+
+  let refCode = "REF" + Date.now();
+
+  let user = {
+    name:name,
+    email:email,
+    pass:pass,
+    balance:0,
+    ref:refCode,
+    doneTasks:[]
+  };
+
+  localStorage.setItem("user_"+email, JSON.stringify(user));
+  localStorage.setItem("currentUser", email);
+
+  alert("Register সফল ✅");
+
+  loadDashboard();
 }
 
-// ================= COMPLETE TASK =================
-function completeTask(id){
-let users=getUsers();
-let user=users.find(u=>u.email===currentUser.email);
+// ---------- LOGIN ----------
+function login(){
 
-if(user.completed.includes(id)) return;
+  let email = document.getElementById("loginEmail").value.trim();
+  let pass = document.getElementById("loginPass").value.trim();
 
-let task=TASKS.find(t=>t.id===id);
-user.taskBalance+=task.reward;
-user.completed.push(id);
+  let data = localStorage.getItem("user_"+email);
 
-saveUsers(users);
-currentUser=user;
+  if(!data){
+    alert("User নেই");
+    return;
+  }
 
-alert("টাকা যোগ হয়েছে ✅");
-showDashboard();
+  let user = JSON.parse(data);
+
+  if(user.pass !== pass){
+    alert("Password ভুল");
+    return;
+  }
+
+  localStorage.setItem("currentUser", email);
+  loadDashboard();
 }
 
-// ================= LOGOUT =================
+// ---------- DASHBOARD ----------
+function loadDashboard(){
+
+  let email = localStorage.getItem("currentUser");
+  if(!email) return;
+
+  let user = JSON.parse(localStorage.getItem("user_"+email));
+
+  authBox.style.display="none";
+  dashBox.style.display="block";
+
+  dName.innerText = user.name;
+  dBal.innerText = user.balance;
+  dRef.innerText = user.ref;
+
+  renderTasks(user);
+}
+
+// ---------- TASK RENDER ----------
+function renderTasks(user){
+
+  tasks.innerHTML="";
+
+  videoTasks.forEach(t=>{
+
+    let done = user.doneTasks.includes(t.id);
+
+    tasks.innerHTML += `
+      <div class="task">
+        🎥 Watch Video ${t.id} — ৳${t.reward}<br>
+        <button ${done?"disabled":""} onclick="doTask(${t.id})">
+          ${done?"Completed":"Watch & Earn"}
+        </button>
+      </div>
+    `;
+  });
+}
+
+// ---------- DO TASK ----------
+function doTask(id){
+
+  let email = localStorage.getItem("currentUser");
+  let user = JSON.parse(localStorage.getItem("user_"+email));
+
+  let task = videoTasks.find(x=>x.id===id);
+
+  if(user.doneTasks.includes(id)) return;
+
+  user.balance += task.reward;
+  user.doneTasks.push(id);
+
+  localStorage.setItem("user_"+email, JSON.stringify(user));
+
+  loadDashboard();
+}
+
+// ---------- LOGOUT ----------
 function logout(){
-currentUser=null;
-showLogin();
+  localStorage.removeItem("currentUser");
+  location.reload();
 }
 
-// start
-showRegister();
+// ---------- HELPERS ----------
+function nameEl(){return document.getElementById("name")}
+function emailEl(){return document.getElementById("email")}
+function passEl(){return document.getElementById("pass")}
+
+// auto login if exists
+window.onload = loadDashboard;
 </script>
+
 </body>
 </html>
